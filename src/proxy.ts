@@ -2,6 +2,25 @@ import { getAccessToken } from "./auth";
 
 const XAI_BASE_URL = "https://api.x.ai";
 
+const HIDDEN_MODELS = [
+  {
+    id: "grok-composer-2.5-fast",
+    aliases: ["grok-composer-2.5", "composer-2.5-fast"],
+    context_length: 256000,
+    created: 1780300800,
+    object: "model" as const,
+    owned_by: "xai",
+    prompt_text_token_price: 5000,
+    cached_prompt_text_token_price: 2000,
+    prompt_image_token_price: 5000,
+    completion_text_token_price: 25000,
+    prompt_text_token_price_long_context: 10000,
+    cached_prompt_text_token_price_long_context: 4000,
+    completion_text_token_price_long_context: 50000,
+    long_context_threshold: 128000,
+  },
+];
+
 export async function proxyRequest(
   path: string,
   request: Request
@@ -25,6 +44,17 @@ export async function proxyRequest(
   }
 
   const upstreamResponse = await fetch(targetUrl, init);
+
+  if (path === "/v1/models" && upstreamResponse.ok) {
+    const data = (await upstreamResponse.json()) as { data: unknown[] };
+    data.data = [...data.data, ...HIDDEN_MODELS];
+    const responseHeaders = new Headers(upstreamResponse.headers);
+    responseHeaders.delete("transfer-encoding");
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: responseHeaders,
+    });
+  }
 
   const responseHeaders = new Headers(upstreamResponse.headers);
   responseHeaders.delete("transfer-encoding");
