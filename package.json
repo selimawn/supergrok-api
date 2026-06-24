@@ -1,0 +1,12 @@
+{
+  "name": "supergrok-api",
+  "version": "1.0.0",
+  "description": "OpenAI-compatible proxy for xAI Grok subscription",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "keywords": ["grok", "xai", "openai", "proxy"],
+  "license": "MIT"
+}
